@@ -124,47 +124,7 @@ public class Utils {
         return bitmap;
     }
 
-    //try to remove copyright
-    //updated at 17.01.23
-    //updated at 21.03.23
     public static String formatSummary(String fullSummary){
-        if (fullSummary.length()==0) return fullSummary;
-
-        if (!fullSummary.contains("\n")) return fullSummary;
-
-        while (fullSummary.endsWith("\n")){
-            fullSummary=fullSummary.substring(0, fullSummary.length()-1);
-        }
-
-        String[] splits=fullSummary.split("\n");
-
-        try {
-            for (int i = splits.length - 1; i >= 0; i--) {
-                String lastSplit = splits[i];
-
-                if (lastSplit.toLowerCase().contains("source") || lastSplit.toLowerCase().contains("written by")) {
-                    int a = fullSummary.indexOf(lastSplit);
-
-                    fullSummary = fullSummary.substring(0, a);
-
-                    break;
-                }
-            }
-        } catch (Exception e){
-            //this is only for compatibility reasons because I don't know if there are summaries made in different way
-
-            String lastSplit=splits[splits.length-1];
-            if (lastSplit.toLowerCase().contains("source") || lastSplit.toLowerCase().contains("written by")){
-                int a=fullSummary.indexOf(lastSplit);
-
-                fullSummary=fullSummary.substring(0, a);
-            }
-        }
-
-        while (fullSummary.endsWith("\n")){
-            fullSummary=fullSummary.substring(0, fullSummary.length()-1);
-        }
-
         return fullSummary;
     }
 
@@ -185,7 +145,7 @@ public class Utils {
     }
 
     public static String unescapeStr(String s){
-        //there must go all stuff that don't unescape automatically
+        //there must go all stuff that doesn't unescape automatically
         return s.replaceAll("&lt;", "<").replaceAll("&gt;", ">");
     }
 
