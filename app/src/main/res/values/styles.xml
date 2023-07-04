@@ -1,0 +1,44 @@
+<resources>
+
+    <!-- Splash Theme -->
+    <style name="Splash.Theme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_layered_splash_icon</item>
+        <item name="windowSplashScreenBackground">#222222</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">#222222</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <item name="colorPrimary">@android:color/transparent</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <item name="colorAccent">#ffffff</item>
+    </style>
+
+    <style name="BottomNavigationViewTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#ffffff</item>
+    </style>
+
+    <style name="AppTheme.WhiteAccent">
+        <item name="colorAccent">#ffffff</item>
+    </style>
+
+    <style name="RatingBarTheme" parent="Theme.AppCompat">
+        <item name="colorControlNormal">#c0c0c0</item>
+        <item name="colorControlActivated">#ffffff</item>
+    </style>
+
+    <style name="DarkDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">#333333</item>
+        <item name="colorAccent">#ffffff</item>
+        <item name="android:textColorPrimary">#ffffff</item>
+        <item name="textColorAlertDialogListItem">#ffffff</item>
+    </style>
+
+    <style name="Custom_SpinnerStyle" >
+        <item name="android:scrollbarThumbVertical">@android:color/white</item>
+    </style>
+
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/trending_item"
+        android:title="@string/kiosk_trending_title" />
+
+    <item
+        android:id="@+id/next_season_item"
+        android:title="@string/kiosk_next_season_title" />
+</menu>

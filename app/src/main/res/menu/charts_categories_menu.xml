@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/top_anime_item"
+        android:title="@string/charts_top_anime_title" />
+
+    <item
+        android:id="@+id/male_characters_item"
+        android:title="@string/charts_male_characters_title" />
+
+    <item
+        android:id="@+id/female_characters_item"
+        android:title="@string/charts_female_characters_title" />
+
+    <item
+        android:id="@+id/couples_item"
+        android:title="@string/charts_couples_title"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/op_songs_item"
+        android:title="@string/charts_op_songs_title" />
+
+    <item
+        android:id="@+id/ed_songs_item"
+        android:title="@string/charts_ed_songs_title" />
+</menu>

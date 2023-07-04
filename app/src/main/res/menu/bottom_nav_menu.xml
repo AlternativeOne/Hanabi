@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/kiosk_nav_item"
+        android:icon="@drawable/ic_nav_fkiosk_white"
+        android:title="@string/nav_kiosk_title" />
+
+    <item
+        android:id="@+id/towatch_nav_item"
+        android:icon="@drawable/ic_nav_ftowatch_white"
+        android:title="@string/nav_towatch_title" />
+
+    <item
+        android:id="@+id/search_nav_item"
+        android:icon="@drawable/ic_nav_fsearch_white"
+        android:title="@string/nav_search_title" />
+
+    <item
+        android:id="@+id/watched_nav_item"
+        android:icon="@drawable/ic_nav_fwatched_white"
+        android:title="@string/nav_watched_title" />
+
+    <item
+        android:id="@+id/more_options_nav_item"
+        android:icon="@drawable/ic_nav_fmore_options_white"
+        android:title="@string/nav_more_options_title" />
+
+</menu>
