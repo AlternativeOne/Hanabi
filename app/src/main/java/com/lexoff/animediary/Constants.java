@@ -2,7 +2,7 @@ package com.lexoff.animediary;
 
 public class Constants {
 
-    public static String AAV="1.5 build_ver.A";
+    public static String AAV="1.5";
 
     public static int SMALLEST_LOCAL_MALID=-1;
     public static int NON_EXIST_MALID=0;
