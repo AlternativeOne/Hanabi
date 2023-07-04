@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        //snackbar will be show above (like underneath but opposite) BottomNavigationView
+        //snackbar will be shown above BottomNavigationView
         //not optimal, but still workable
         View anchorView=findViewById(R.id.nav_fragment_container);
         Snackbar.make(anchorView, getString(R.string.exit_dialog_prompt), Snackbar.LENGTH_LONG)
