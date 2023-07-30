@@ -10,10 +10,10 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lexoff.animediary.Constants;
-import com.lexoff.animediary.ImageLoaderWrapper;
+import com.lexoff.animediary.Util.ImageLoaderWrapper;
 import com.lexoff.animediary.Info.ChartsItemInfo;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.Collections;
 import java.util.Comparator;

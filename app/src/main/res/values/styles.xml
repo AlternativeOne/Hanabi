@@ -1,14 +1,12 @@
 <resources>
 
-    <!-- Splash Theme -->
     <style name="Splash.Theme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_layered_splash_icon</item>
         <item name="windowSplashScreenBackground">#222222</item>
-        <item name="postSplashScreenTheme">@style/AppTheme</item>
+        <item name="postSplashScreenTheme">@style/Theme.Base.Hanabi</item>
     </style>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Base.Hanabi" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:windowBackground">#222222</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
@@ -17,28 +15,34 @@
         <item name="colorAccent">#ffffff</item>
     </style>
 
-    <style name="BottomNavigationViewTheme" parent="Theme.AppCompat.Light">
+    <style name="BottomNavigationViewTheme" parent="Theme.MaterialComponents.Light">
         <item name="colorPrimary">#ffffff</item>
     </style>
 
-    <style name="AppTheme.WhiteAccent">
+    <style name="Theme.Base.Hanabi.WhiteAccent">
         <item name="colorAccent">#ffffff</item>
     </style>
 
-    <style name="RatingBarTheme" parent="Theme.AppCompat">
+    <style name="RatingBarTheme" parent="Theme.MaterialComponents.Light">
         <item name="colorControlNormal">#c0c0c0</item>
         <item name="colorControlActivated">#ffffff</item>
     </style>
 
-    <style name="DarkDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="DarkDialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
         <item name="android:windowBackground">#333333</item>
         <item name="colorAccent">#ffffff</item>
         <item name="android:textColorPrimary">#ffffff</item>
         <item name="textColorAlertDialogListItem">#ffffff</item>
+
+        <item name="colorControlNormal">#ffffff</item>
+
+        <item name="buttonBarPositiveButtonStyle">@style/DarkDialogTheme.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DarkDialogTheme.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/DarkDialogTheme.Button</item>
     </style>
 
-    <style name="Custom_SpinnerStyle" >
-        <item name="android:scrollbarThumbVertical">@android:color/white</item>
+    <style name="DarkDialogTheme.Button" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">#ffffff</item>
     </style>
 
 </resources>

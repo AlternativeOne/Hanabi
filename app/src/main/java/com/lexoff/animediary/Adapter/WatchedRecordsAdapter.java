@@ -10,11 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
-import com.lexoff.animediary.Database.AnimeWatchedEntity;
-import com.lexoff.animediary.ImageLoaderWrapper;
-import com.lexoff.animediary.ListMode;
+import com.lexoff.animediary.Database.Model.AnimeWatchedEntity;
+import com.lexoff.animediary.Util.ImageLoaderWrapper;
+import com.lexoff.animediary.Enum.ListMode;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,10 +122,7 @@ public class WatchedRecordsAdapter extends RecyclerView.Adapter<WatchedRecordsAd
             summaryView.setText(Utils.shortenSummary(summary, 200));
         }
 
-        int watched=0;
-        try {
-            watched=Integer.parseInt(localItems.get(position).watched_episodes);
-        } catch (Exception e){}
+        int watched=Utils.countWatchedEpisodes(localItems.get(position).watched_episodes);
         int unwatched=localItems.get(position).epcount-watched;
 
         TextView badgeView=viewHolder.getBadgeView();

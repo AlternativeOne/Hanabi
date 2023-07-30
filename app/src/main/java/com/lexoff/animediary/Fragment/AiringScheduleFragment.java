@@ -13,7 +13,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.preference.PreferenceManager;
@@ -23,10 +22,10 @@ import com.lexoff.animediary.Api;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Info.AiringScheduleInfo;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Enum.InfoSourceType;
+import com.lexoff.animediary.Util.NavigationUtils;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,7 +37,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class AiringScheduleFragment extends Fragment {
+public class AiringScheduleFragment extends BaseFragment {
 
     private AtomicBoolean isLoading = new AtomicBoolean(false);
     private Disposable currentWorker;
@@ -64,7 +63,7 @@ public class AiringScheduleFragment extends Fragment {
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
     }
 
     @Override

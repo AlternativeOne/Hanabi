@@ -4,6 +4,8 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 
+import com.lexoff.animediary.Util.ApplicationUtils;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
@@ -27,7 +29,9 @@ public class App extends Application {
 
         app = this;
 
-        getClient();
+        ApplicationUtils.buildAndPushDynamicShortcuts(this);
+
+        SettingsMigrations.doMigrations(this);
 
         configureRxJavaErrorHandler();
     }

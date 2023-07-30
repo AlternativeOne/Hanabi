@@ -7,16 +7,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Database.ADatabase;
 import com.lexoff.animediary.Database.AppDatabase;
-import com.lexoff.animediary.ImageLoaderWrapper;
 import com.lexoff.animediary.Info.CompanyAnimeItemInfo;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.ImageLoaderWrapper;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +82,7 @@ public class CompanyItemsAdapter extends RecyclerView.Adapter<CompanyItemsAdapte
     }
 
     @Override
+    @NonNull
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         return new ViewHolder(LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.company_grid_item, viewGroup, false));
@@ -88,14 +90,12 @@ public class CompanyItemsAdapter extends RecyclerView.Adapter<CompanyItemsAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        CompanyAnimeItemInfo item=localItems.get(position);
+        CompanyAnimeItemInfo item = localItems.get(position);
 
         Utils.resizeImageView(viewHolder.getThumbnailView(), Constants.GRID_ITEM_DUMMY_BITMAP_WIDTH, Constants.GRID_ITEM_DUMMY_BITMAP_HEIGHT);
 
-        ImageLoaderWrapper.loadImageAndResizeWithPlaceholder(item.getThumbnailUrl(),
+        ImageLoaderWrapper.loadImageWithPlaceholder(item.getThumbnailUrl(),
                 viewHolder.getThumbnailView(),
-                Constants.GRID_ITEM_DUMMY_BITMAP_WIDTH,
-                Constants.GRID_ITEM_DUMMY_BITMAP_HEIGHT,
                 () -> {
                     viewHolder.getThumbnailView().setImageResource(R.drawable.dummy_no_thumbnail);
                 }
@@ -146,7 +146,7 @@ public class CompanyItemsAdapter extends RecyclerView.Adapter<CompanyItemsAdapte
             return Collections.emptyList();
         }
 
-        return  this.localItems;
+        return this.localItems;
     }
 
     public void sortByName(){
@@ -158,6 +158,14 @@ public class CompanyItemsAdapter extends RecyclerView.Adapter<CompanyItemsAdapte
         });
 
         notifyDataSetChanged();
+    }
+
+    public void addItems(List<CompanyAnimeItemInfo> items){
+        int start=localItems.size();
+
+        localItems.addAll(items);
+
+        notifyItemRangeChanged(start, items.size());
     }
 
 }

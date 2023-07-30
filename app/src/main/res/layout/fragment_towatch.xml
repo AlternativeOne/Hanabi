@@ -185,6 +185,8 @@
             android:id="@+id/to_top_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="#ffffff"
+            app:borderWidth="0dp"
             android:src="@drawable/ic_top_arrow_white" />
 
     </LinearLayout>

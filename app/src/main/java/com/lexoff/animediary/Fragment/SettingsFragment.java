@@ -1,11 +1,12 @@
 package com.lexoff.animediary.Fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,29 +17,51 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.lexoff.animediary.Adapter.AppIconsAdapter;
+import com.lexoff.animediary.AppIcon;
 import com.lexoff.animediary.BumperCallback;
-import com.lexoff.animediary.CacheUtils;
 import com.lexoff.animediary.Changelog;
 import com.lexoff.animediary.Constants;
-import com.lexoff.animediary.LicensesHelper;
+import com.lexoff.animediary.CustomOnItemClickListener;
+import com.lexoff.animediary.Database.ADatabase;
+import com.lexoff.animediary.Exception.InvalidZipException;
 import com.lexoff.animediary.LruCache;
-import com.lexoff.animediary.NavigationUtils;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.ApplicationUtils;
+import com.lexoff.animediary.Util.BackupHelper;
+import com.lexoff.animediary.Util.CacheUtils;
+import com.lexoff.animediary.Util.LicensesHelper;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.ROMTHelper;
+import com.lexoff.animediary.Util.ResourcesHelper;
+import com.lexoff.animediary.Util.ShareUtils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.io.File;
+import java.util.List;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends BaseFragment {
+
+    ActivityResultLauncher<Intent> requestSelectBumperLauncher
+            =registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::requestSelectBumperResult);
+    ActivityResultLauncher<Intent> requestSelectBackupFileLauncher
+            =registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::requestSelectBackupFileResult);
+    ActivityResultLauncher<Intent> requestSelectRestoreFileLauncher
+            =registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::requestSelectRestoreFileResult);
 
     private SharedPreferences prefs;
 
@@ -60,8 +83,6 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        toastHandler=new Handler(Looper.getMainLooper());
 
         prefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
     }
@@ -93,8 +114,11 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         //set margins of statusbar and navbar
-        int statusbarHeight = Utils.getStatusBarHeight(requireContext());
-        rootView.setPadding(0, statusbarHeight, 0, 0);
+        //post because if not then padding will not be set to rootview of fragments opened from AnimeFragment
+        rootView.post(()->{
+            int statusbarHeight = Utils.getStatusBarHeight(requireContext());
+            rootView.setPadding(0, statusbarHeight, 0, 0);
+        });
 
         int navbarHeight=Utils.getNavBarHeight(requireContext());
         View nbMarginView=rootView.findViewById(R.id.navbar_margin_view);
@@ -123,10 +147,45 @@ public class SettingsFragment extends Fragment {
         setupSwitch(R.id.show_added_to_badge_switch, Constants.SHOW_ADDED_TO_BADGE, true);
         setupSwitch(R.id.show_english_titles_switch, Constants.SHOW_ENGLISH_TITLES, false);
         setupSwitch(R.id.show_next_airing_episode_switch, Constants.SHOW_NEXT_AIRING_EPISODE, true);
-        setupSwitch(R.id.show_cover_tip_switch, Constants.SHOW_COVER_TIP, true);
+
+        setupSwitch(R.id.use_secure_mode_switch, Constants.USE_SECURE_MODE_KEY, false);
 
         /*Password Block*/
         setupPwdSwitch();
+        /*              */
+
+        RecyclerView appIconsView=rootView.findViewById(R.id.icons_view);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
+        appIconsView.setLayoutManager(layoutManager);
+
+        AppIconsAdapter appIconsAdapter=new AppIconsAdapter(AppIcon.getIcons(), new CustomOnItemClickListener(){
+            @Override
+            public void onClick(View v, int position){
+                Utils.animateClickOnItem(v, () -> {
+                    String newAppIconAlias=AppIcon.getIcons().get(position).alias;
+
+                    prefs.edit().putString(Constants.APP_ICON_KEY, newAppIconAlias).commit();
+                    ApplicationUtils.changeAppIcon(requireContext(), newAppIconAlias);
+
+                    AppIconsAdapter adapter=(AppIconsAdapter) appIconsView.getAdapter();
+                    adapter.setSelectedItem(position);
+                });
+            }
+        });
+
+        List<AppIcon> appIcons=AppIcon.getIcons();
+        String curAppIconAlias=prefs.getString(Constants.APP_ICON_KEY, appIcons.get(0).alias);
+        for (AppIcon appIcon : appIcons){
+            if (appIcon.alias.equals(curAppIconAlias)){
+                appIconsAdapter.setSelectedItem(appIcons.indexOf(appIcon));
+
+                break;
+            }
+        }
+
+        appIconsView.setAdapter(appIconsAdapter);
 
         View setBumperRow=rootView.findViewById(R.id.set_bumper_row);
         setBumperRow.setOnClickListener(v -> {
@@ -134,7 +193,8 @@ public class SettingsFragment extends Fragment {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, getString(R.string.settings_select_bumper_intent_title)), Constants.SELECT_BUMPER_ID);
+
+                Utils.launchActivityOrShowMessage(requireContext(), requestSelectBumperLauncher, Intent.createChooser(intent, getString(R.string.settings_select_bumper_intent_title)));
             });
         });
 
@@ -159,16 +219,53 @@ public class SettingsFragment extends Fragment {
             });
         });
 
+        View makeBackupRow=rootView.findViewById(R.id.make_backup_row);
+        makeBackupRow.setOnClickListener(v -> {
+            Utils.animateClickOnItem(v, () -> {
+                Utils.launchActivityOrShowMessage(requireContext(), requestSelectBackupFileLauncher, BackupHelper.getBackupPicker());
+            });
+        });
+
+        View restoreRow=rootView.findViewById(R.id.restore_row);
+        restoreRow.setOnClickListener(v -> {
+            Utils.animateClickOnItem(v, () -> {
+                Utils.launchActivityOrShowMessage(requireContext(), requestSelectRestoreFileLauncher, BackupHelper.getRestorePicker());
+            });
+        });
+
+        View appPageRow=rootView.findViewById(R.id.app_page_row);
+        ((TextView)((ViewGroup) appPageRow).getChildAt(1)).setText(Constants.APP_GITHUB_LINK);
+        appPageRow.setOnClickListener(v -> {
+            Utils.animateClickOnItem(v, () -> {
+                ShareUtils.copyToClipboard(requireContext(), null, Constants.APP_GITHUB_LINK);
+            });
+        });
+
+        View developerRow=rootView.findViewById(R.id.developer_row);
+        developerRow.setOnClickListener(v -> {
+            Utils.animateClickOnItem(v, () -> {
+                ShareUtils.copyToClipboard(requireContext(), null, Constants.DEV_GITHUB_LINK);
+            });
+        });
+
+        View versionRow=rootView.findViewById(R.id.version_row);
+        versionRow.setOnClickListener(v -> {
+            Utils.animateClickOnItem(v, () -> {
+                NavigationUtils.openSplash2Fragment(requireActivity());
+            });
+        });
+
         TextView versionView = rootView.findViewById(R.id.version_summary);
         versionView.setText(/*BuildConfig.VERSION_NAME*/ Constants.AAV);
 
         View changelogRow=rootView.findViewById(R.id.changelog_row);
         changelogRow.setOnClickListener(v -> {
             Utils.animateClickOnItem(v, () -> {
-                new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+                new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                         .setTitle(getString(R.string.changelog_dialog_title))
                         .setMessage(Changelog.buildChangelog())
                         .setPositiveButton(getString(R.string.close_button_title), null)
+                        .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                         .create()
                         .show();
             });
@@ -180,9 +277,7 @@ public class SettingsFragment extends Fragment {
 
         View clearCacheRow=rootView.findViewById(R.id.clear_cache_row);
         clearCacheRow.setOnClickListener(v -> {
-            Utils.animateClickOnItem(v, () -> {
-                tryDeleteCacheFiles();
-            });
+            Utils.animateClickOnItem(v, this::tryDeleteCacheFiles);
         });
 
         View clearMetadataRow=rootView.findViewById(R.id.clear_metadata_row);
@@ -202,27 +297,27 @@ public class SettingsFragment extends Fragment {
 
         View malRow = rootView.findViewById(R.id.mal_row);
         malRow.setOnClickListener(v -> {
-            Utils.animateClickOnItem(v, () -> Utils.copyToClipboard(requireContext(), "MyAnimeList", "https://myanimelist.net/"));
+            Utils.animateClickOnItem(v, () -> ShareUtils.copyToClipboard(requireContext(), "MyAnimeList", "https://myanimelist.net/"));
         });
 
         View alRow = rootView.findViewById(R.id.al_row);
         alRow.setOnClickListener(v -> {
-            Utils.animateClickOnItem(v, () -> Utils.copyToClipboard(requireContext(), "AniList", "https://anilist.co/"));
+            Utils.animateClickOnItem(v, () -> ShareUtils.copyToClipboard(requireContext(), "AniList", "https://anilist.co/"));
         });
 
         View fiRow=rootView.findViewById(R.id.fi_row);
         fiRow.setOnClickListener(v -> {
-            Utils.animateClickOnItem(v, () -> Utils.copyToClipboard(requireContext(), "Feather", "https://feathericons.com/"));
+            Utils.animateClickOnItem(v, () -> ShareUtils.copyToClipboard(requireContext(), "Feather", "https://feathericons.com/"));
         });
 
         View atRow=rootView.findViewById(R.id.at_row);
         atRow.setOnClickListener(v -> {
-            Utils.animateClickOnItem(v, () -> Utils.copyToClipboard(requireContext(), "Anime Trending", "https://anitrendz.com/"));
+            Utils.animateClickOnItem(v, () -> ShareUtils.copyToClipboard(requireContext(), "Anime Trending", "https://anitrendz.com/"));
         });
 
         View mdRow=rootView.findViewById(R.id.md_row);
         mdRow.setOnClickListener(v -> {
-            Utils.animateClickOnItem(v, () -> Utils.copyToClipboard(requireContext(), "MangaDex", "https://mangadex.org/"));
+            Utils.animateClickOnItem(v, () -> ShareUtils.copyToClipboard(requireContext(), "MangaDex", "https://mangadex.org/"));
         });
 
         /*Licenses*/
@@ -258,9 +353,10 @@ public class SettingsFragment extends Fragment {
         /**********/
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.SELECT_BUMPER_ID) {
+    private void requestSelectBumperResult(ActivityResult result){
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent data=result.getData();
+
             if (data == null || data.getData() == null) {
                 //null can be not only if error
                 //but if exited without choice made
@@ -284,6 +380,65 @@ public class SettingsFragment extends Fragment {
 
 
             });
+        }
+    }
+
+    private void requestSelectBackupFileResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent data = result.getData();
+
+            if (data == null || data.getData() == null) {
+                //null can be not only if error
+                //but if exited without choice made
+
+                return;
+            }
+
+            Uri path = data.getData();
+
+            try {
+                ADatabase.checkpoint();
+
+                BackupHelper.addToZip(path, new File[]{BackupHelper.db()});
+
+                Toast.makeText(requireContext(), getString(R.string.make_backup_success_toast_message), Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(requireContext(), String.format(getString(R.string.error_happened_with_message), Utils.getStringOrEmpty(e.getMessage())), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void requestSelectRestoreFileResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent data = result.getData();
+
+            if (data == null || data.getData() == null) {
+                //null can be not only if error
+                //but if exited without choice made
+
+                return;
+            }
+
+            Uri path = data.getData();
+
+            try {
+                BackupHelper.getFromZip(path);
+
+                BackupHelper.dbJournal().delete();
+                BackupHelper.dbWal().delete();
+                BackupHelper.dbShm().delete();
+
+                Toast.makeText(requireContext(), getString(R.string.restore_success_toast_message), Toast.LENGTH_SHORT).show();
+
+                ROMTHelper.runOnMainThread(() -> {
+                    ADatabase.close();
+                    NavigationUtils.triggerRebirth(requireContext());
+                }, 2000L);
+            } catch (InvalidZipException e1) {
+                Toast.makeText(requireContext(), getString(R.string.invalid_backup_file), Toast.LENGTH_SHORT).show();
+            } catch (Exception e2) {
+                Toast.makeText(requireContext(), String.format(getString(R.string.error_happened_with_message), Utils.getStringOrEmpty(e2.getMessage())), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -384,15 +539,16 @@ public class SettingsFragment extends Fragment {
             prefs.edit().putBoolean(Constants.USE_PASSWORD_BLOCK, isChecked).commit();
 
             if (isChecked) {
-                NavigationUtils.openPINFragment(requireActivity(), 1);
+                NavigationUtils.openPINFragment(requireActivity(), 1, null);
             }
         });
     }
 
     private void showLicenseDialog(Spanned text){
-        new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+        new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                 .setMessage(text)
                 .setPositiveButton(getString(R.string.close_button_title), null)
+                .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                 .create()
                 .show();
     }

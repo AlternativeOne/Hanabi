@@ -17,23 +17,24 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.lexoff.animediary.Adapter.PlaylistItemsAdapter;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Database.ADatabase;
 import com.lexoff.animediary.Database.AppDatabase;
-import com.lexoff.animediary.Database.PlaylistEntity;
-import com.lexoff.animediary.Database.PlaylistStreamEntity;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Database.Model.PlaylistEntity;
+import com.lexoff.animediary.Database.Model.PlaylistStreamEntity;
+import com.lexoff.animediary.Enum.InfoSourceType;
+import com.lexoff.animediary.Util.NavigationUtils;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.ResourcesHelper;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,7 +44,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class PlaylistFragment extends Fragment {
+public class PlaylistFragment extends BaseFragment {
 
     private int playlistId=-1;
     private PlaylistEntity playlist;
@@ -80,7 +81,7 @@ public class PlaylistFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
 
@@ -303,11 +304,12 @@ public class PlaylistFragment extends Fragment {
 
         TextView nameValidationTextView=dialogView.findViewById(R.id.name_validation_textview);
 
-        AlertDialog dialog=new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+        AlertDialog dialog=new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                 .setView(dialogView)
                 .setCancelable(false)
                 .setPositiveButton(getString(R.string.dialog_save_button_title), null)
                 .setNegativeButton(getString(R.string.dialog_cancel_button_title), null)
+                .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                 .create();
 
         dialog.setOnShowListener(d -> {
@@ -341,7 +343,7 @@ public class PlaylistFragment extends Fragment {
     }
 
     private void showDeleteDialog(){
-        new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+        new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                 .setMessage(String.format(getString(R.string.dialog_delete_message), playlist.name))
                 .setCancelable(false)
                 .setPositiveButton(getString(R.string.dialog_delete_button_title), (dialog, which) -> {
@@ -351,6 +353,7 @@ public class PlaylistFragment extends Fragment {
                     requireActivity().onBackPressed();
                 })
                 .setNegativeButton(getString(R.string.dialog_cancel_button_title), null)
+                .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                 .create()
                 .show();
     }

@@ -1,8 +1,11 @@
 package com.lexoff.animediary.Fragment;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -23,50 +26,51 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 import androidx.palette.graphics.Palette;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.lexoff.animediary.Adapter.GenresAdapter;
-import com.lexoff.animediary.Adapter.PlaylistsAdapter;
 import com.lexoff.animediary.Adapter.PlaylistsChipsAdapter;
+import com.lexoff.animediary.Adapter.PlaylistsDialogAdapter;
 import com.lexoff.animediary.Api;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
-import com.lexoff.animediary.CustomSpinnerArrayAdapter;
 import com.lexoff.animediary.Database.ADatabase;
-import com.lexoff.animediary.Database.AnimeToWatchEntity;
-import com.lexoff.animediary.Database.AnimeWatchedEntity;
 import com.lexoff.animediary.Database.AppDatabase;
-import com.lexoff.animediary.Database.NoteEntity;
-import com.lexoff.animediary.Database.PlaylistEntity;
-import com.lexoff.animediary.Database.PlaylistStreamEntity;
-import com.lexoff.animediary.ImageLoaderWrapper;
+import com.lexoff.animediary.Database.Model.AnimeToWatchEntity;
+import com.lexoff.animediary.Database.Model.AnimeWatchedEntity;
+import com.lexoff.animediary.Database.Model.NoteEntity;
+import com.lexoff.animediary.Database.Model.PlaylistEntity;
+import com.lexoff.animediary.Database.Model.PlaylistStreamEntity;
 import com.lexoff.animediary.Info.AnimeAdditionalInfo;
 import com.lexoff.animediary.Info.AnimeInfo;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Enum.InfoSourceType;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.SelectSpinner;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.ImageLoaderWrapper;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.ResourcesHelper;
+import com.lexoff.animediary.Util.ShareUtils;
+import com.lexoff.animediary.Util.Utils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -81,7 +85,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class AnimeFragment extends Fragment {
+public class AnimeFragment extends BaseFragment {
 
     private final int TOAST_ANIMATION_DURATION=100;
     private final int WRITE_TO_DATABASE_DELAY=250;
@@ -92,7 +96,7 @@ public class AnimeFragment extends Fragment {
     private AtomicBoolean isAdditionalLoading=new AtomicBoolean(false);
     private Disposable additionalWorker;
 
-    private Handler noteHandler, toastHandler, tipHolder;
+    private Handler noteHandler, toastHandler;
 
     private SharedPreferences defPrefs;
 
@@ -146,9 +150,8 @@ public class AnimeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        noteHandler=new Handler(Looper.getMainLooper());
-        toastHandler=new Handler(Looper.getMainLooper());
-        tipHolder=new Handler(Looper.getMainLooper());
+        noteHandler=new Handler(Looper.myLooper(), null);
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
 
@@ -179,8 +182,11 @@ public class AnimeFragment extends Fragment {
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         //set margins of statusbar
-        int statusbarHeight = Utils.getStatusBarHeight(requireContext());
-        rootView.setPadding(0, statusbarHeight, 0, 0);
+        //post because if not then padding will not be set to rootview of fragments opened from AnimeFragment
+        rootView.post(()->{
+            int statusbarHeight = Utils.getStatusBarHeight(requireContext());
+            rootView.setPadding(0, statusbarHeight, 0, 0);
+        });
 
         int navbarHeight=Utils.getNavBarHeight(requireContext());
         View nbMarginView=rootView.findViewById(R.id.navbar_margin_view);
@@ -212,7 +218,12 @@ public class AnimeFragment extends Fragment {
         shareBtn.setOnClickListener(v -> {
             Utils.animateClickOnImageButton(v, () -> {
                 if (currentInfo!=null){
-                    Utils.copyToClipboard(requireContext(), "", Utils.buildAnimeUrl(currentInfo.getMalid()));
+                    String extraTitle = currentInfo.getTitle();
+                    if (defPrefs.getBoolean(Constants.SHOW_ENGLISH_TITLES, false) && !currentInfo.getSecondTitle().isEmpty()) {
+                        extraTitle = currentInfo.getSecondTitle();
+                    }
+
+                    ShareUtils.shareText(requireContext(),  Utils.buildAnimeUrl(currentInfo.getMalid()), String.format(getString(R.string.share_anime_extra_title), extraTitle));
                 }
             });
         });
@@ -231,14 +242,14 @@ public class AnimeFragment extends Fragment {
 
         titleView=rootView.findViewById(R.id.title_view);
         titleView.setOnLongClickListener(v -> {
-            Utils.copyToClipboard(requireContext(), "", currentInfo.getTitle());
+            ShareUtils.copyToClipboard(requireContext(), "", currentInfo.getTitle());
 
             return true;
         });
 
         secondTitleView=rootView.findViewById(R.id.second_title_view);
         secondTitleView.setOnLongClickListener(v -> {
-            Utils.copyToClipboard(requireContext(), "", currentInfo.getSecondTitle());
+            ShareUtils.copyToClipboard(requireContext(), "", currentInfo.getSecondTitle());
 
             return true;
         });
@@ -262,7 +273,7 @@ public class AnimeFragment extends Fragment {
                 try {
                     JsonObject sourceMaterialObj = JsonParser.object().from(currentInfo.getSourceMaterial());
                     title=sourceMaterialObj.getString("title");
-                } catch (Exception e){}
+                } catch (Exception ignored){}
 
                 NavigationUtils.openMDSearchFragment(requireActivity(), title);
             }
@@ -419,10 +430,70 @@ public class AnimeFragment extends Fragment {
 
             }
         });
+
         notesView.setOnFocusChangeListener((v, hasFocus) -> {
             //loose of focus happens only if any other button clicked or if fragment closed
             if (!hasFocus) {
                 Utils.hideKeyboard(notesView);
+            }
+        });
+
+        ScrollView mainLayout=rootView.findViewById(R.id.main_layout);
+        mainLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                View root = getView();
+                if (root == null || currentInfo == null) return;
+
+                TextView detailsView = root.findViewById(R.id.details_title);
+
+                if (scrollY > secondTitleView.getBottom()) {
+                    String title = currentInfo.getTitle();
+                    if (defPrefs.getBoolean(Constants.SHOW_ENGLISH_TITLES, false) && !currentInfo.getSecondTitle().isEmpty()) {
+                        title = currentInfo.getSecondTitle();
+                    }
+
+                    if (!detailsView.getText().toString().equals(getString(R.string.fragment_anime_details_title)))
+                        return;
+
+                    View pab = root.findViewById(R.id.pab);
+                    View abBackBtn = pab.findViewById(R.id.ab_back_btn);
+                    View abRefreshBtn = pab.findViewById(R.id.ab_refresh_btn);
+                    View abShareBtn = pab.findViewById(R.id.ab_share_btn);
+
+                    StringBuilder str = new StringBuilder(title);
+
+                    int loopCounter=0;
+
+                    while (loopCounter<title.split(" ").length) {
+                        Rect bounds = new Rect();
+                        Paint textPaint = detailsView.getPaint();
+                        textPaint.getTextBounds(str.toString(), 0, str.length(), bounds);
+                        if (bounds.width() > ((abRefreshBtn.getVisibility() == View.VISIBLE ? abRefreshBtn.getLeft() : abShareBtn.getLeft()) - abBackBtn.getRight())) {
+                            str.delete(str.lastIndexOf(" "), str.length());
+                            str.append(" ...");
+                        } else {
+                            break;
+                        }
+
+                        loopCounter++;
+                    }
+
+                    //TODO
+                    detailsView.setText(str);
+
+                    if (str.toString().endsWith("..."))
+                        detailsView.setPadding(
+                                abBackBtn.getRight() + Utils.dpToPx(requireContext(), 5),
+                                0,
+                                pab.getWidth() - (abRefreshBtn.getVisibility() == View.VISIBLE ? abRefreshBtn.getLeft() : abShareBtn.getLeft()) + Utils.dpToPx(requireContext(), 5),
+                                0
+                        );
+                } else {
+                    detailsView.setText(getString(R.string.fragment_anime_details_title));
+
+                    detailsView.setPadding(0, 0, 0, 0);
+                }
             }
         });
 
@@ -533,42 +604,109 @@ public class AnimeFragment extends Fragment {
             showOrHideRatingBar(false);
         }*/
 
-        String[] episodes = new String[info.getEpisodesCount() + 1];
-
-        episodes[0] = getString(R.string.spinner_no_episode);
-
-        for (int i = 1; i <= info.getEpisodesCount(); i++) {
-            episodes[i] = String.format(getString(R.string.spinner_episode), i);
-        }
-
-        CustomSpinnerArrayAdapter adapter = new CustomSpinnerArrayAdapter(requireContext(), R.layout.custom_spinner_item, episodes);
-        SelectSpinner episodesSpinner = rootView.findViewById(R.id.episodes_spinner);
-        episodesSpinner.setAdapter(adapter);
+        TextView episodesSelector = rootView.findViewById(R.id.episodes_selector);
 
         List<AnimeWatchedEntity> records = database.animeWatchedDAO().getAllByMALId(info.getMalid());
         if (records.size() == 1) {
             AnimeWatchedEntity record = records.get(0);
-            int wEp = Integer.parseInt(record.watched_episodes);
 
-            episodesSpinner.setSelection(wEp);
+            episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), Utils.countWatchedEpisodes(record.watched_episodes), info.getEpisodesCount()));
 
             showOrHideEpisodesSection(true);
+        } else {
+            episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), 0, info.getEpisodesCount()));
         }
 
-        episodesSpinner.addOnSelectSpinnerListener(new SelectSpinner.OnSelectSpinnerListener() {
-            @Override
-            public void onOpenSelectMenu() {
+        episodesSelector.setOnClickListener(v -> {
+            AnimeWatchedEntity record3 = database.animeWatchedDAO().getAllByMALId(currentInfo.getMalid()).get(0);
 
+            if (record3.epcount==0){
+                return;
             }
 
-            @Override
-            public void onItemSelectByUser(AdapterView<?> parent, View view, int position, long id) {
-                String watchedEpisodes = String.valueOf(position);
+            String[] splits1 = record3.watched_episodes.split(",");
 
-                database.animeWatchedDAO().updateWatchedEpisodes(currentInfo.getMalid(), watchedEpisodes, new Date().getTime());
+            String[] episodes = new String[record3.epcount];
 
-                updateMarkAsWatchedButton();
+            for (int i = 0; i < episodes.length; i++) {
+                episodes[i] = String.format(getString(R.string.spinner_episode), i + 1);
             }
+
+            boolean[] selected = new boolean[episodes.length];
+
+            for (int i = 0; i < episodes.length; i++) {
+                final int episodeNumber = i + 1;
+
+                selected[i] = Arrays.stream(splits1).anyMatch(s -> s.equals(String.valueOf(episodeNumber)));
+            }
+
+            AlertDialog dialog=new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
+                    .setBackground(ResourcesHelper.roundedDarkDialogBackground())
+                    .setMultiChoiceItems(episodes, selected, (d, which, isChecked) -> {
+                        AnimeWatchedEntity record2 = database.animeWatchedDAO().getAllByMALId(info.getMalid()).get(0);
+
+                        ArrayList<String> splits2 = new ArrayList<>(Arrays.asList(record2.watched_episodes.split(",")));
+
+                        int lastWatched = which + 1;
+
+                        if (isChecked){
+                            splits2.add(String.valueOf(lastWatched));
+                        } else {
+                            splits2.remove(String.valueOf(lastWatched));
+                        }
+
+                        String newWatchedEpisodes=Utils.arrayListToString(splits2, ",");
+
+                        database.animeWatchedDAO().updateWatchedEpisodes(currentInfo.getMalid(), newWatchedEpisodes, new Date().getTime());
+
+                        episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), Utils.countWatchedEpisodes(newWatchedEpisodes), info.getEpisodesCount()));
+
+                        updateMarkAsWatchedButton();
+                    })
+                    .setPositiveButton(getString(R.string.episodes_selector_dialog_select_all_button_title), null)
+                    .setNegativeButton(getString(R.string.episodes_selector_dialog_unselect_all_button_title), null)
+                    .create();
+
+            dialog.setOnShowListener(d -> {
+                Button positiveBtn=dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveBtn.setOnClickListener(v2 -> {
+                    ArrayList<String> watched=new ArrayList<>();
+
+                    ListView listView=dialog.getListView();
+                    for (int i=0; i<listView.getCount(); i++){
+                        listView.setItemChecked(i, true);
+
+                        watched.add(String.valueOf(i+1));
+
+                        selected[i]=true;
+                    }
+
+                    String newWatchedEpisodes=Utils.arrayListToString(watched, ",");
+
+                    database.animeWatchedDAO().updateWatchedEpisodes(currentInfo.getMalid(), newWatchedEpisodes, new Date().getTime());
+
+                    episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), Utils.countWatchedEpisodes(newWatchedEpisodes), info.getEpisodesCount()));
+
+                    updateMarkAsWatchedButton();
+                });
+
+                Button negativeBtn=dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                negativeBtn.setOnClickListener(v3 -> {
+                    ListView listView=dialog.getListView();
+                    for (int i=0; i<listView.getCount(); i++){
+                        listView.setItemChecked(i, false);
+                        selected[i]=false;
+                    }
+
+                    database.animeWatchedDAO().updateWatchedEpisodes(currentInfo.getMalid(), "", new Date().getTime());
+
+                    episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), 0, info.getEpisodesCount()));
+
+                    updateMarkAsWatchedButton();
+                });
+            });
+
+            dialog.show();
         });
 
         if (info.getMalid() <= Constants.SMALLEST_LOCAL_MALID) {
@@ -583,6 +721,9 @@ public class AnimeFragment extends Fragment {
 
             View recommendationsBtn=rootView.findViewById(R.id.recommendations_btn);
             recommendationsBtn.setVisibility(View.GONE);
+
+            View charactersBtn=rootView.findViewById(R.id.characters_btn);
+            charactersBtn.setVisibility(View.GONE);
 
             thumbnailView.setClickable(false);
         }
@@ -643,18 +784,6 @@ public class AnimeFragment extends Fragment {
     }
 
     private void firstUpdateWatchedButton(){
-        if (currentInfo.getMalid() <= Constants.SMALLEST_LOCAL_MALID){
-            addToWatchedButton.setVisibility(View.GONE);
-
-            //basically, layout_gravity=center_horizontal
-            ConstraintLayout.LayoutParams params=(ConstraintLayout.LayoutParams) addToWatchButton.getLayoutParams();
-            params.leftToLeft=ConstraintLayout.LayoutParams.PARENT_ID;
-            params.rightToRight=ConstraintLayout.LayoutParams.PARENT_ID;
-            addToWatchButton.setLayoutParams(params);
-
-            return;
-        }
-
         if (database.animeWatchedDAO().countByMALId(currentInfo.getMalid()) == 1) {
             addToWatchedButton.setImageResource(R.drawable.ic_heart_filled_white);
 
@@ -666,6 +795,10 @@ public class AnimeFragment extends Fragment {
             addToWatchedButtonTitleView.setTextColor(Color.parseColor("#909090"));
             addToWatchedButtonTitleView.setText(getString(R.string.add_to_watched_button_title));
         }
+
+        boolean isWatchedButtonEnabled=!(currentInfo.getMalid() <= Constants.SMALLEST_LOCAL_MALID);
+        addToWatchedButton.setEnabled(isWatchedButtonEnabled);
+        addToWatchedButtonTitleView.setEnabled(isWatchedButtonEnabled);
 
         addToWatchedButton.setOnClickListener(v -> {
             notesView.clearFocus();
@@ -890,7 +1023,7 @@ public class AnimeFragment extends Fragment {
             public void onAnimationRepeat(Animation animation) {
                 AnimeWatchedEntity record=database.animeWatchedDAO().getAllByMALId(malid).get(0);
 
-                if (record.epcount==Long.parseLong(record.watched_episodes)){
+                if (record.epcount==Utils.countWatchedEpisodes(record.watched_episodes)){
                     markAsFinishedButton.setText(getString(R.string.finished_status));
                     markAsFinishedButton.setClickable(false);
                 } else {
@@ -912,10 +1045,15 @@ public class AnimeFragment extends Fragment {
         try {
             AnimeWatchedEntity record = database.animeWatchedDAO().getAllByMALId(malid).get(0);
 
-            SelectSpinner episodesSpinner = rootView.findViewById(R.id.episodes_spinner);
-            episodesSpinner.setSelection(record.epcount);
+            TextView episodesSelector=rootView.findViewById(R.id.episodes_selector);
+            episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), record.epcount, record.epcount));
 
-            database.animeWatchedDAO().updateWatchedEpisodes(currentInfo.getMalid(), String.valueOf(record.epcount), new Date().getTime());
+            ArrayList<String> splits=new ArrayList<>();
+            for (int i=0; i<record.epcount; i++){
+                splits.add(String.valueOf(i+1));
+            }
+
+            database.animeWatchedDAO().updateWatchedEpisodes(currentInfo.getMalid(), Utils.arrayListToString(splits, ","), new Date().getTime());
 
             updateMarkAsWatchedButton();
         } catch (Exception e) {
@@ -987,18 +1125,19 @@ public class AnimeFragment extends Fragment {
         layoutManager.setOrientation(RecyclerView.VERTICAL);
         resultsView.setLayoutManager(layoutManager);
 
-        AlertDialog dialog=new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+        AlertDialog dialog=new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                 .setView(dialogView)
                 .setCancelable(true)
                 .setOnDismissListener(dialog1 -> setupPlaylistsChips())
+                .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                 .create();
 
         List<PlaylistEntity> playlists=database.playlistDAO().getAll();
 
-        PlaylistsAdapter adapter = new PlaylistsAdapter(requireContext(), playlists, new CustomOnItemClickListener(){
+        PlaylistsDialogAdapter adapter = new PlaylistsDialogAdapter(requireContext(), playlists, new CustomOnItemClickListener(){
             @Override
             public void onClick(View v, int position){
-                PlaylistEntity item=((PlaylistsAdapter) resultsView.getAdapter()).getItem(position);
+                PlaylistEntity item=((PlaylistsDialogAdapter) resultsView.getAdapter()).getItem(position);
 
                 if (database.playlistStreamDAO().countByMALId(item.id, currentInfo.getMalid()) > 0){
                     showToastMessage(String.format(getString(R.string.already_added_to_playlist_toast_message), currentInfo.getTitle(), item.name));
@@ -1185,23 +1324,30 @@ public class AnimeFragment extends Fragment {
 
                 thumbnailView.setImageBitmap(bitmap);
 
-                TextView coverTipView = rootView.findViewById(R.id.cover_poster_tip_view);
-                if (defPrefs.getBoolean(Constants.SHOW_COVER_TIP, true)) {
-                    coverTipView.setWidth((bitmap.getWidth() * 2) + 100);
-                    coverTipView.setVisibility(View.VISIBLE);
-                    tipHolder.postDelayed(() -> coverTipView.setVisibility(View.GONE), 2000L);
-                } else {
-                    coverTipView.setVisibility(View.GONE);
-                }
-
                 if (defPrefs.getBoolean(Constants.USE_GRADIENT_IN_POST, true)) {
                     Palette p = Palette.from(bitmap).generate();
 
                     try {
-                        //VibrantSwatch could be wrong sometimes
-                        //noticed on Konosuba
-                        //technically, it could be improved, but even this way it is good because it is kinda normal practice
-                        int[] colors = {p.getDarkMutedSwatch().getRgb(), Color.parseColor("#171717")};
+                        Palette.Swatch swatch=p.getVibrantSwatch();
+                        if (swatch==null) {
+                            swatch=p.getDarkMutedSwatch();
+                        }
+
+                        if (swatch==null){
+                            //nothing could be done
+
+                            return;
+                        }
+
+                        int color=swatch.getRgb();
+                        double ratio=0.5;
+
+                        // https://github.com/Docile-Alligator/Infinity-For-Reddit/blob/master/app/src/main/java/ml/docilealligator/infinityforreddit/utils/MaterialYouUtils.java#L250
+                        int startingColor=Color.argb(Color.alpha(color), (int) (Color.red(color) * (1 - ratio)),
+                                (int) (Color.green(color) * (1 - ratio)),
+                                (int) (Color.blue(color) * (1 - ratio)));
+
+                        int[] colors = {startingColor, Color.parseColor("#171717")};
                         GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
                         gd.setCornerRadius(0f);
                         gd.setAlpha(255 - 65);
@@ -1319,14 +1465,26 @@ public class AnimeFragment extends Fragment {
                     long cmalid = Long.parseLong(split1.substring(split1.indexOf("|") + 1));
 
                     ClickableSpan clickableSpan = new ClickableSpan() {
+                        private boolean clicked=false;
+
                         @Override
                         public void onClick(View textView) {
+                            clicked=true;
+                            textView.invalidate();
+
                             NavigationUtils.openCompanyFragment(requireActivity(), cmalid);
                         }
 
                         @Override
                         public void updateDrawState(TextPaint ds) {
                             super.updateDrawState(ds);
+
+                            if (clicked)
+                                ds.bgColor=Color.parseColor("#999999");
+                            else
+                                ds.bgColor=Color.parseColor("#00ffffff");
+
+                            clicked = false;
 
                             ds.setUnderlineText(true);
                         }
@@ -1371,14 +1529,26 @@ public class AnimeFragment extends Fragment {
                     long cmalid = Long.parseLong(split1.substring(split1.indexOf("|") + 1));
 
                     ClickableSpan clickableSpan = new ClickableSpan() {
+                        private boolean clicked=false;
+
                         @Override
                         public void onClick(View textView) {
+                            clicked=true;
+                            textView.invalidate();
+
                             NavigationUtils.openCompanyFragment(requireActivity(), cmalid);
                         }
 
                         @Override
                         public void updateDrawState(TextPaint ds) {
                             super.updateDrawState(ds);
+
+                            if (clicked)
+                                ds.bgColor=Color.parseColor("#999999");
+                            else
+                                ds.bgColor=Color.parseColor("#00ffffff");
+
+                            clicked = false;
 
                             ds.setUnderlineText(true);
                         }
@@ -1444,7 +1614,7 @@ public class AnimeFragment extends Fragment {
                     spBtn.setTextColor(Color.parseColor("#FFFFFF"));
 
                     spBtn.setOnClickListener(v ->
-                            Utils.copyToClipboard(requireContext(), title, url)
+                            ShareUtils.copyToClipboard(requireContext(), title, url)
                     );
 
                     availableAtLayout.addView(spBtn);
@@ -1489,14 +1659,26 @@ public class AnimeFragment extends Fragment {
                     SpannableString ss = new SpannableString(String.format("%s: %s", st, title));
                     ss.setSpan(new StyleSpan(Typeface.BOLD), 0, st.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ss.setSpan(new ClickableSpan() {
+                        private boolean clicked=false;
+
                         @Override
                         public void onClick(View textView) {
+                            clicked=true;
+                            textView.invalidate();
+
                             NavigationUtils.openAnimeFragment(requireActivity(), mid, finalSourceType);
                         }
 
                         @Override
                         public void updateDrawState(TextPaint ds) {
                             super.updateDrawState(ds);
+
+                            if (clicked)
+                                ds.bgColor=Color.parseColor("#999999");
+                            else
+                                ds.bgColor=Color.parseColor("#00ffffff");
+
+                            clicked = false;
 
                             ds.setUnderlineText(true);
                         }
@@ -1605,12 +1787,12 @@ public class AnimeFragment extends Fragment {
                                 }
                             }
 
-                            new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+                            new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                                     .setItems(items, (dialog, which) -> {
                                         if (which == 0) {
-                                            Utils.copyToClipboard(requireContext(), "", artist+" "+title);
+                                            ShareUtils.copyToClipboard(requireContext(), "", artist+" "+title);
                                         } else if (which == 1) {
-                                            Utils.copyToClipboard(requireContext(), "", spotifyUrl);
+                                            ShareUtils.copyToClipboard(requireContext(), "", spotifyUrl);
                                         } else if (which == 2) {
                                             if (!Utils.openUrlInSpotifyApp(requireContext(), spotifyUrl)) {
                                                 showToastMessage(getString(R.string.error_happened));
@@ -1618,6 +1800,7 @@ public class AnimeFragment extends Fragment {
                                         }
                                     })
                                     .setCancelable(true)
+                                    .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                                     .create()
                                     .show();
                         });
@@ -1715,12 +1898,12 @@ public class AnimeFragment extends Fragment {
                                 }
                             }
 
-                            new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+                            new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                                     .setItems(items, (dialog, which) -> {
                                         if (which == 0) {
-                                            Utils.copyToClipboard(requireContext(), "", artist+" "+title);
+                                            ShareUtils.copyToClipboard(requireContext(), "", artist+" "+title);
                                         } else if (which == 1) {
-                                            Utils.copyToClipboard(requireContext(), "", spotifyUrl);
+                                            ShareUtils.copyToClipboard(requireContext(), "", spotifyUrl);
                                         } else if (which == 2) {
                                             if (!Utils.openUrlInSpotifyApp(requireContext(), spotifyUrl)) {
                                                 showToastMessage(getString(R.string.error_happened));
@@ -1728,6 +1911,7 @@ public class AnimeFragment extends Fragment {
                                         }
                                     })
                                     .setCancelable(true)
+                                    .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                                     .create()
                                     .show();
                         });
@@ -1845,18 +2029,22 @@ public class AnimeFragment extends Fragment {
         }
     }
 
-    private void showOrHideEpisodesSection(boolean show){
-        View episodesTitle=rootView.findViewById(R.id.episodes_title);
+    private void showOrHideEpisodesSection(boolean show) {
+        View episodesTitle = rootView.findViewById(R.id.episodes_title);
         episodesTitle.setVisibility(show ? View.VISIBLE : View.GONE);
 
-        SelectSpinner episodesSpinner=rootView.findViewById(R.id.episodes_spinner);
-        episodesSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
+        TextView episodesSelector = rootView.findViewById(R.id.episodes_selector);
+        episodesSelector.setVisibility(show ? View.VISIBLE : View.GONE);
 
-        if (!show){
-            episodesSpinner.setSelection(0);
+        if (show) {
+            AnimeWatchedEntity record=database.animeWatchedDAO().getAllByMALId(currentInfo.getMalid()).get(0);
+
+            markAsFinishedButton.setVisibility(record.epcount>0 ? View.VISIBLE : View.GONE);
+        } else {
+            episodesSelector.setText(String.format(getString(R.string.watched_episodes_text), 0, currentInfo.getEpisodesCount()));
+
+            markAsFinishedButton.setVisibility(View.GONE);
         }
-
-        markAsFinishedButton.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void showOrHideRatingBar(boolean show) {

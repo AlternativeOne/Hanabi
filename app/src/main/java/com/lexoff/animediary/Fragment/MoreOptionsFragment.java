@@ -1,13 +1,15 @@
 package com.lexoff.animediary.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.Utils;
 
 public class MoreOptionsFragment extends BaseFragment {
 
@@ -37,6 +39,16 @@ public class MoreOptionsFragment extends BaseFragment {
         openByUrlRow.setOnClickListener(v -> {
             Utils.animateClickOnItem(v, () -> {
                 Utils.showOpenByUrlDialog(requireActivity());
+            });
+        });
+
+        View scanUrlRow=rootView.findViewById(R.id.scan_url_row);
+        scanUrlRow.setVisibility(Utils.isScannerAppInstalled(requireActivity()) ? View.VISIBLE : View.GONE);
+        scanUrlRow.setOnClickListener(v -> {
+            Utils.animateClickOnItem(v, () -> {
+                Intent intent=new Intent();
+                intent.setPackage(Constants.SCANNER_APP_PACKAGE_NAME);
+                startActivity(intent);
             });
         });
 

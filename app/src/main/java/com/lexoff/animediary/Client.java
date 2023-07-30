@@ -18,9 +18,11 @@ public class Client {
     private OkHttpClient client;
 
     private Client(OkHttpClient.Builder builder) {
+        //timeout were adjusted
         OkHttpClient.Builder b = builder
+                .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
-                .connectTimeout(5, TimeUnit.SECONDS);
+                .writeTimeout(30, TimeUnit.SECONDS);
 
         this.client=b.build();
     }

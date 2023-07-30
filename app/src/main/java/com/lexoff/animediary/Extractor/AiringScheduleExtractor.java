@@ -4,7 +4,6 @@ import com.lexoff.animediary.Client;
 import com.lexoff.animediary.Info.AiringScheduleInfo;
 import com.lexoff.animediary.Info.AnimeSearchItemInfo;
 import com.lexoff.animediary.Info.Info;
-import com.lexoff.animediary.Utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

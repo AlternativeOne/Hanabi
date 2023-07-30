@@ -37,6 +37,28 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/scan_url_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@null"
+            android:padding="15dp"
+            android:layout_marginTop="25dp"
+            android:layout_gravity="center_horizontal" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/scan_link_button_title"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textAlignment="center"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/airing_schedule_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

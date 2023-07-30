@@ -18,7 +18,11 @@ public class Changelog {
             "<b>1.4 build_ver.F</b><p>",
             "<b>1.4 build_ver.G (26.04.23)</b><p>",
             "<b>1.4 build_ver.H (28.04.23)</b><p>",
-            "<b>1.5 build_ver.A (03.07.23)</b><p>"
+            "<b>1.5 build_ver.A (03.07.23)</b><p>",
+            "<b>1.5.1</b><p>",
+            "<b>1.5.2</b><p>",
+            "<b>1.6.0-beta1 (14.07.23)</b><p>",
+            "<b>1.6.0-beta2 (15.07.23)</b><p>"
     };
 
     public static SpannableStringBuilder buildChangelog() {

@@ -19,19 +19,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.lexoff.animediary.Adapter.PlaylistsAdapter;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Database.ADatabase;
 import com.lexoff.animediary.Database.AppDatabase;
-import com.lexoff.animediary.Database.PlaylistEntity;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Database.Model.PlaylistEntity;
+import com.lexoff.animediary.Util.NavigationUtils;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.ResourcesHelper;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +43,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class PlaylistsFragment extends Fragment {
+public class PlaylistsFragment extends BaseFragment {
 
     private AppDatabase database;
     private SharedPreferences defPrefs;
@@ -67,7 +69,7 @@ public class PlaylistsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
 
@@ -208,11 +210,12 @@ public class PlaylistsFragment extends Fragment {
 
         TextView nameValidationTextView=dialogView.findViewById(R.id.name_validation_textview);
 
-        AlertDialog dialog=new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+        AlertDialog dialog=new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                 .setView(dialogView)
                 .setCancelable(false)
                 .setPositiveButton(getString(R.string.dialog_add_button_title), null)
                 .setNegativeButton(getString(R.string.dialog_cancel_button_title), null)
+                .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                 .create();
 
         dialog.setOnShowListener(d -> {

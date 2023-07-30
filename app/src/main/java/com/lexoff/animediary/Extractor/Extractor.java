@@ -2,7 +2,7 @@ package com.lexoff.animediary.Extractor;
 
 import com.lexoff.animediary.Client;
 import com.lexoff.animediary.Info.Info;
-import com.lexoff.animediary.ServiceUnavailableException;
+import com.lexoff.animediary.Exception.ServiceUnavailableException;
 
 import java.io.IOException;
 
@@ -56,8 +56,10 @@ public abstract class Extractor {
             response=client.post(url, data);
         }
 
-        if (throwOnErrorCodes && (response==null || response.code()!=200)){
-            throw new ServiceUnavailableException("");
+        if (throwOnErrorCodes && (response==null || response.code()!=200)) {
+            throw new ServiceUnavailableException(response != null
+                    ? String.format("Service responded with: code=%d", response.code())
+                    : "Call's answer is empty");
         }
 
         onPageFetched(response);
@@ -65,7 +67,7 @@ public abstract class Extractor {
     }
 
     protected void assertPageFetched() {
-        if (!pageFetched) throw new IllegalStateException("Page is not fetched. Make sure you call fetchPage()");
+        if (!pageFetched) throw new IllegalStateException("Page is not fetched.");
     }
 
     protected boolean isPageFetched() {

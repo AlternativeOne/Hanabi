@@ -10,11 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
-import com.lexoff.animediary.Database.AnimeToWatchEntity;
-import com.lexoff.animediary.ImageLoaderWrapper;
-import com.lexoff.animediary.ListMode;
+import com.lexoff.animediary.Database.Model.AnimeToWatchEntity;
+import com.lexoff.animediary.Util.ImageLoaderWrapper;
+import com.lexoff.animediary.Enum.ListMode;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,24 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.lexoff.animediary">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".App"
-        android:allowBackup="true"
+        android:name="com.lexoff.animediary.App"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_app_icon"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_app_icon"
         android:supportsRtl="true"
-        android:theme="@style/Splash.Theme" >
-        <activity android:name=".MainActivity" android:windowSoftInputMode="adjustResize" >
+        android:theme="@style/Splash.Theme">
+
+        <activity
+            android:name="com.lexoff.animediary.RouterActivity"
+            android:label="@string/share_action_open_link_hint" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="myanimelist.net" />
+                <data android:pathPrefix="/anime/*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.lexoff.animediary.MainActivity"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
+        <activity-alias
+            android:name=".Default"
+            android:enabled="true"
+            android:icon="@mipmap/ic_app_icon"
+            android:roundIcon="@mipmap/ic_app_icon"
+            android:targetActivity="com.lexoff.animediary.MainActivity"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Firework"
+            android:enabled="false"
+            android:icon="@mipmap/ic_app_icon_firework"
+            android:roundIcon="@mipmap/ic_app_icon_firework"
+            android:targetActivity="com.lexoff.animediary.MainActivity"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
     </application>
 
 </manifest>

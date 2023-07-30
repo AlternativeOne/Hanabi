@@ -14,18 +14,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
 import com.lexoff.animediary.Adapter.ChartsItemsAdapter;
 import com.lexoff.animediary.Api;
-import com.lexoff.animediary.ChartsCategory;
+import com.lexoff.animediary.Enum.ChartsCategory;
 import com.lexoff.animediary.Info.ChartsInfo;
 import com.lexoff.animediary.Info.ChartsItemInfo;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,7 +34,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ChartsFragment extends Fragment {
+public class ChartsFragment extends BaseFragment {
 
     private AtomicBoolean isLoading = new AtomicBoolean(false);
     private Disposable currentWorker;
@@ -64,7 +63,7 @@ public class ChartsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
     }
@@ -88,8 +87,11 @@ public class ChartsFragment extends Fragment {
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         //set margins of statusbar
-        int statusbarHeight = Utils.getStatusBarHeight(requireContext());
-        rootView.setPadding(0, statusbarHeight, 0, 0);
+        //post because if not then padding will not be set to rootview of fragments opened from AnimeFragment
+        rootView.post(()->{
+            int statusbarHeight = Utils.getStatusBarHeight(requireContext());
+            rootView.setPadding(0, statusbarHeight, 0, 0);
+        });
 
         int navbarHeight=Utils.getNavBarHeight(requireContext());
         View nbMarginView=rootView.findViewById(R.id.navbar_margin_view);

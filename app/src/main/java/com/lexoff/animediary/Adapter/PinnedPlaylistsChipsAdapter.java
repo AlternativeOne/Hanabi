@@ -8,9 +8,9 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lexoff.animediary.CustomOnItemClickListener;
-import com.lexoff.animediary.Database.PlaylistEntity;
+import com.lexoff.animediary.Database.Model.PlaylistEntity;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.Collections;
 import java.util.List;

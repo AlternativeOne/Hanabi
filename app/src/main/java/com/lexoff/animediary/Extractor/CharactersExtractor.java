@@ -8,19 +8,14 @@ import com.lexoff.animediary.Info.CharacterVAInfo;
 import com.lexoff.animediary.Info.CharactersInfo;
 import com.lexoff.animediary.Info.Info;
 
-public class CharactersExtractor extends Extractor {
-
-    private String PATH="https://graphql.anilist.co";
+public class CharactersExtractor extends AniListBaseExtractor {
 
     private String dataPattern="{\"query\":\"query media($id:Int,$page:Int){Media(idMal:$id){id characters(page:$page,sort:[ROLE,RELEVANCE,ID]){pageInfo{total perPage currentPage lastPage hasNextPage}edges{id role name voiceActorRoles(sort:[RELEVANCE,ID]){roleNotes dubGroup voiceActor{id name{userPreferred}language:languageV2 image{large}}}node{id name{userPreferred}image{large}}}}}}\",\"variables\":{\"id\":%d,\"type\":\"ANIME\",\"page\":%d}}";
 
     public CharactersExtractor(Client client, long malid, int page){
         super(client, "");
 
-        setUrl(PATH);
         setData(String.format(dataPattern, malid, page));
-        setPOST();
-        setThrowOnErrorCodes(false);
     }
 
     @Override

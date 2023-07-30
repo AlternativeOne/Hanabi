@@ -8,19 +8,14 @@ import com.lexoff.animediary.Info.AnimeRecommendationsInfo;
 import com.lexoff.animediary.Info.AnimeSearchItemInfo;
 import com.lexoff.animediary.Info.Info;
 
-public class AnimeRecommendationsExtractor extends Extractor {
-
-    private String PATH="https://graphql.anilist.co";
+public class AnimeRecommendationsExtractor extends AniListBaseExtractor {
 
     private String dataPattern="{\"query\":\"query media($id:Int,$type:MediaType,$isAdult:Boolean){Media(idMal:$id,type:$type,isAdult:$isAdult){recommendations(perPage:100,sort:[RATING_DESC,ID]){pageInfo{total}nodes{id mediaRecommendation{id idMal title{romaji english} coverImage{extraLarge}}}}}}\",\"variables\":{\"id\":\"%d\",\"type\":\"ANIME\",\"isAdult\":false}}";
 
     public AnimeRecommendationsExtractor(Client client, long malid){
         super(client, "");
 
-        setUrl(PATH);
         setData(String.format(dataPattern, malid));
-        setPOST();
-        setThrowOnErrorCodes(false);
     }
 
     @Override

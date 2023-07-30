@@ -14,16 +14,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.widget.NestedScrollView;
-import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
 import com.lexoff.animediary.Adapter.CharactersItemsAdapter;
 import com.lexoff.animediary.Api;
 import com.lexoff.animediary.Info.CharactersInfo;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,7 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class AnimeCharactersFragment extends Fragment {
+public class AnimeCharactersFragment extends BaseFragment {
 
     private AtomicBoolean isLoading = new AtomicBoolean(false);
     private Disposable currentWorker;
@@ -67,7 +66,7 @@ public class AnimeCharactersFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
 

@@ -8,13 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.lexoff.animediary.Constants;
-import com.lexoff.animediary.NavigationUtils;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +22,7 @@ import pl.droidsonroids.gif.AnimationListener;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class SplashFragment extends Fragment {
+public class SplashFragment extends BaseFragment {
 
     private final long ANIMATION_DURATION=2000L;
 
@@ -69,7 +68,7 @@ public class SplashFragment extends Fragment {
                         //ignore loop count
 
                         if (PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean(Constants.USE_PASSWORD_BLOCK, false)) {
-                            NavigationUtils.openPINFragment(requireActivity(), 0);
+                            NavigationUtils.openPINFragment(requireActivity(), 0, () -> NavigationUtils.openNavigationFragment(requireActivity()));
                         } else {
                             NavigationUtils.openNavigationFragment(requireActivity());
                         }
@@ -93,7 +92,7 @@ public class SplashFragment extends Fragment {
                         public void onAnimationEnd(Animator animation) {
                             if (shouldStartWithoutGif.get()) {
                                 if (PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean(Constants.USE_PASSWORD_BLOCK, false)) {
-                                    NavigationUtils.openPINFragment(requireActivity(), 0);
+                                    NavigationUtils.openPINFragment(requireActivity(), 0, () -> NavigationUtils.openNavigationFragment(requireActivity()));
                                 } else {
                                     NavigationUtils.openNavigationFragment(requireActivity());
                                 }

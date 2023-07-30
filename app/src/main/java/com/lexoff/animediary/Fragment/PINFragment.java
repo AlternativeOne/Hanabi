@@ -10,17 +10,16 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.lexoff.animediary.Constants;
-import com.lexoff.animediary.NavigationUtils;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
-public class PINFragment extends Fragment {
+public class PINFragment extends BaseFragment {
 
     private int mode=0;
+    private Runnable callback=null;
 
     private EditText inputView;
     private ImageView lockView;
@@ -33,14 +32,19 @@ public class PINFragment extends Fragment {
         //empty
     }
 
-    public static PINFragment newInstance(int mode) {
+    public static PINFragment newInstance(int mode, Runnable callback) {
         PINFragment fragment = new PINFragment();
         fragment.setMode(mode);
+        fragment.setCallback(callback);
         return fragment;
     }
 
     private void setMode(int mode){
         this.mode=mode;
+    }
+
+    private void setCallback(Runnable callback){
+        this.callback=callback;
     }
 
     @Override
@@ -88,8 +92,6 @@ public class PINFragment extends Fragment {
         View continueBtn=bottomButtonsLayout.findViewById(R.id.continue_btn);
         continueBtn.setOnClickListener(v -> {
             Utils.animateClickOnItem(v, () -> {
-                defPrefs.edit().putString(Constants.PIN_VALUE, inputView.getText().toString()).commit();
-
                 requireActivity().onBackPressed();
             });
         });
@@ -108,12 +110,14 @@ public class PINFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isWorkMode() && pwd.equals(s.toString())){
+                if (isWorkMode() && pwd.equals(s.toString())) {
                     numbersLayout.setClickable(false);
 
                     lockView.setImageResource(R.drawable.ic_unlocked_white);
 
-                    NavigationUtils.openNavigationFragment(requireActivity());
+                    if (callback != null) {
+                        callback.run();
+                    }
                 }
             }
 
@@ -183,9 +187,18 @@ public class PINFragment extends Fragment {
     }
 
     //separate fun in case it will be more conditions
-    //to not copy-paste all of them
+    //so, to not copy-paste all of them
     private boolean isWorkMode(){
         return mode==0;
     }
 
+
+    @Override
+    public boolean onBackPressed() {
+        if (!isWorkMode()) {
+            defPrefs.edit().putString(Constants.PIN_VALUE, inputView.getText().toString()).commit();
+        }
+
+        return true;
+    }
 }

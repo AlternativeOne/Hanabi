@@ -8,10 +8,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lexoff.animediary.Database.ADatabase;
-import com.lexoff.animediary.Database.AnimeWatchedEntity;
+import com.lexoff.animediary.Database.Model.AnimeWatchedEntity;
 import com.lexoff.animediary.Database.AppDatabase;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.List;
 
@@ -83,7 +83,7 @@ public class StatisticsFragment extends BaseFragment {
 
         int uniqueTotalWatched=0, totalWatched=0, uniqueTotalFinished=0, totalFinished=0, episodesWatched=0, timeSpent=0;
         for (AnimeWatchedEntity record : records){
-            int curEpisodesWatched=Integer.parseInt(record.watched_episodes);
+            int curEpisodesWatched=Utils.countWatchedEpisodes(record.watched_episodes);
 
             episodesWatched+=curEpisodesWatched;
 

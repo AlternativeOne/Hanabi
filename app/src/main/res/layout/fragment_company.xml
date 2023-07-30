@@ -140,9 +140,20 @@
             android:id="@+id/to_top_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="#ffffff"
+            app:borderWidth="0dp"
             android:src="@drawable/ic_top_arrow_white" />
 
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/load_more_items_progressbar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:indeterminate="true"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="?actionBarSize"
+        android:visibility="gone" />
 
     <include layout="@layout/loading_layout"
         android:layout_width="match_parent"

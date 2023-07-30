@@ -16,10 +16,10 @@ import androidx.annotation.NonNull;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.lexoff.animediary.Api;
-import com.lexoff.animediary.ImageLoaderWrapper;
+import com.lexoff.animediary.Util.ImageLoaderWrapper;
 import com.lexoff.animediary.Info.AnimeAdditionalInfo;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -85,8 +85,11 @@ public class ThumbnailViewerFragment extends BaseFragment {
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         //set margins of statusbar
-        int statusbarHeight = Utils.getStatusBarHeight(requireContext());
-        rootView.setPadding(0, statusbarHeight, 0, 0);
+        //post because if not then padding will not be set to rootview of fragments opened from AnimeFragment
+        rootView.post(()->{
+            int statusbarHeight = Utils.getStatusBarHeight(requireContext());
+            rootView.setPadding(0, statusbarHeight, 0, 0);
+        });
 
         ImageView backBtn=rootView.findViewById(R.id.ab_back_btn);
         backBtn.setOnClickListener(v -> {

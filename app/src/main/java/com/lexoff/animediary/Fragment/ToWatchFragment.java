@@ -3,8 +3,6 @@ package com.lexoff.animediary.Fragment;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,27 +18,29 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.NestedScrollView;
-import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.lexoff.animediary.Adapter.PinnedPlaylistsChipsAdapter;
 import com.lexoff.animediary.Adapter.ToWatchRecordsAdapter;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Database.ADatabase;
-import com.lexoff.animediary.Database.AnimeToWatchDAO;
-import com.lexoff.animediary.Database.AnimeToWatchEntity;
 import com.lexoff.animediary.Database.AppDatabase;
-import com.lexoff.animediary.Database.NoteDAO;
-import com.lexoff.animediary.Database.PlaylistEntity;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.ListMode;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Database.DAO.AnimeToWatchDAO;
+import com.lexoff.animediary.Database.DAO.NoteDAO;
+import com.lexoff.animediary.Database.Model.AnimeToWatchEntity;
+import com.lexoff.animediary.Database.Model.PlaylistEntity;
+import com.lexoff.animediary.Enum.InfoSourceType;
+import com.lexoff.animediary.Enum.ListMode;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.ROMTHelper;
+import com.lexoff.animediary.Util.ResourcesHelper;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.Date;
 import java.util.List;
@@ -52,7 +52,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ToWatchFragment extends Fragment {
+public class ToWatchFragment extends BaseFragment {
 
     private SharedPreferences defPrefs;
     private AppDatabase database;
@@ -213,8 +213,18 @@ public class ToWatchFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        if (resultsView != null)
+        if (resultsView != null && resultsView.getLayoutManager()!=null)
             savedListState = resultsView.getLayoutManager().onSaveInstanceState();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+        if (currentWorker!=null){
+            currentWorker.dispose();
+            currentWorker=null;
+        }
     }
 
     @Override
@@ -380,11 +390,12 @@ public class ToWatchFragment extends Fragment {
 
         TextView titleValidationTextView=dialogView.findViewById(R.id.title_validation_textview);
 
-        AlertDialog dialog=new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+        AlertDialog dialog=new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                 .setView(dialogView)
                 .setCancelable(true)
                 .setPositiveButton(getString(R.string.dialog_add_button_title), null)
                 .setNegativeButton(getString(R.string.dialog_cancel_button_title), null)
+                .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                 .create();
 
         dialog.setOnShowListener(d -> {
@@ -398,7 +409,7 @@ public class ToWatchFragment extends Fragment {
                     return;
                 }
 
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                ROMTHelper.runOnMainThread(() -> {
                     addRecord(titleEditText.getText().toString(), secondaryTitleEditText.getText().toString(), summaryEditText.getText().toString());
                 }, Constants.POST_EXEC_SMALLEST_DELAY);
 

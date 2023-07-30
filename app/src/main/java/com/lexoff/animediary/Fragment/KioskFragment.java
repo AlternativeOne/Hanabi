@@ -15,10 +15,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.widget.NestedScrollView;
-import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
 import com.lexoff.animediary.Adapter.TrendingItemsAdapter;
 import com.lexoff.animediary.Api;
@@ -27,11 +26,11 @@ import com.lexoff.animediary.CustomHashMap;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Info.SeasonInfo;
 import com.lexoff.animediary.Info.TrendingInfo;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.KioskCategory;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Enum.InfoSourceType;
+import com.lexoff.animediary.Enum.KioskCategory;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +40,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class KioskFragment extends Fragment {
+public class KioskFragment extends BaseFragment {
 
     private AtomicBoolean isLoading = new AtomicBoolean(false);
     private Disposable currentWorker;
@@ -73,7 +72,7 @@ public class KioskFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
     }

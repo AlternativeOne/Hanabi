@@ -46,4 +46,5 @@ public class CompanyInfo extends Info {
     public void addItem(CompanyAnimeItemInfo item){
         this.itemsAll.add(item);
     }
+
 }

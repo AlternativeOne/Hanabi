@@ -7,8 +7,6 @@ import com.lexoff.animediary.Client;
 import com.lexoff.animediary.Extractor.Extractor;
 import com.lexoff.animediary.Extractor.ExtractorUtils;
 import com.lexoff.animediary.Info.Info;
-import com.lexoff.animediary.Manga.MangaInfo;
-import com.lexoff.animediary.Manga.MangaItemInfo;
 
 public class MDSearchExtractor extends Extractor {
 
@@ -54,7 +52,7 @@ public class MDSearchExtractor extends Extractor {
                 String id=dataObj.getString("id");
                 String titleStr=title.getString("en");
                 //TODO: maybe description available in different place?
-                String descriptionStr= ExtractorUtils.getStringOrEmpty(description.getString("en"));
+                String descriptionStr=ExtractorUtils.getStringOrEmpty(description.getString("en"));
                 String thumbnailUrl=String.format(COVER_URL, id, coverArt.getObject("attributes").getString("fileName"));
 
                 item.setId(id);

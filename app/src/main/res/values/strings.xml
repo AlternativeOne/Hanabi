@@ -1,7 +1,4 @@
-<!DOCTYPE resources [
-    <!ENTITY appname "Hanabi">
-    <!ENTITY appdev "AlternativeOne">
-    ]>
+<!DOCTYPE resources [<!ENTITY appname "Hanabi"><!ENTITY appdev "AlternativeOne">]>
 
 <resources>
     <string name="developer_name" translatable="false">&appdev;</string>
@@ -38,7 +35,6 @@
     <string name="fragment_details_title">Details</string>
     <string name="fragment_anime_details_title">Anime Details</string>
     <string name="fragment_company_details_title">Company Details</string>
-    <string name="cover_poster_tip">Click to watch large cover</string>
     <string name="cover_poster_button_title">COVER POSTER</string>
     <string name="next_episode_row_title">Next Episode:</string>
     <string name="type_row_title">Type:</string>
@@ -57,9 +53,9 @@
     <string name="ending_themes_title">Ending Themes</string>
     <string name="summary_title">Summary</string>
     <string name="rating_title">Rating</string>
-    <string name="watched_episodes_title">Last watched episode</string>
+    <string name="watched_episodes_title">Episodes</string>
     <string name="notes_title">Notes</string>
-    <string name="notes_hint">Enter notes here…</string>
+    <string name="notes_hint">Note…</string>
     <string name="spinner_no_episode">No episode</string>
     <string name="spinner_episode">Episode %d</string>
     <string name="info_updated_toast_message">Info was updated</string>
@@ -81,6 +77,7 @@
     <string name="unknown_placeholder">Unknown</string>
     <string name="similar_to">Similar to %s</string>
     <string name="open_link_button_title">Open Link</string>
+    <string name="scan_link_button_title">Scan Link</string>
     <string name="airing_schedule_button_title">Airing\nSchedule</string>
     <string name="charts_button_title">Charts</string>
     <string name="playlists_button_title">Playlists</string>
@@ -115,12 +112,16 @@
     <string name="copied_to_clipboard_toast_message">Copied to clipboard:\n%s</string>
     <string name="url_cannot_be_empty_message">Url cannot be empty</string>
     <string name="storage_title">Storage</string>
+    <string name="app_icon_title">App Icon</string>
+    <string name="bumper_title">Bumper</string>
+    <string name="backup_title">Backup &amp; Restore</string>
     <string name="other_apps_row_title">Other apps</string>
     <string name="cache_row_title">Cache</string>
     <string name="free_row_title">Free</string>
     <string name="about_title">About &appname;</string>
     <string name="version_title">Version</string>
     <string name="developer_title">Developer</string>
+    <string name="app_page_title">App on Github</string>
     <string name="attributions_title">Attributions</string>
     <string name="libraries_title">Libraries</string>
     <string name="company_works_title">Projects</string>
@@ -159,41 +160,58 @@
     <string name="manga_dialog_item_open_in_tachiyomi">Open in Tachiyomi</string>
     <string name="file_saved_to_toast_message">Saved to %s</string>
     <string name="set_bumper_button_title">SET AS BUMPER</string>
+    <string name="make_backup_success_toast_message">Exported</string>
+    <string name="restore_success_toast_message">Imported. App will be restarted</string>
+    <string name="invalid_backup_file">Invalid backup file</string>
+    <string name="share_dialog_copy_button_title">Copy</string>
+    <string name="share_dialog_share_button_title">Share</string>
+    <string name="no_file_manager_message">No file manager was found.\nPlease install a file manager.</string>
+    <string name="dialog_ok_button_title">OK</string>
+    <string name="watched_episodes_text">%d/%d episodes</string>
+    <string name="episodes_selector_dialog_select_all_button_title">Select All</string>
+    <string name="episodes_selector_dialog_unselect_all_button_title">Unselect All</string>
+    <string name="share_action_open_link_hint">Open Link</string>
+    <string name="share_anime_extra_title">%s on MyAnimeList</string>
 
     <string name="settings_use_gradient_title">Use gradient in item page</string>
     <string name="settings_use_gradient_summary">Use gradient as a background on item\'s details\npage</string>
     <string name="settings_always_update_info_title">Always update info</string>
     <string name="settings_always_update_info_summary">Always update item\'s info when opening\ndetails page</string>
-    <string name="settings_show_left_episodes_badge_title">Show \'episodes left\' badge</string>
+    <string name="settings_show_left_episodes_badge_title">Show \'Episodes Left\' badge</string>
     <string name="settings_show_left_episodes_badge_summary">Show badges on items in Library with number\nof episodes left unwatched</string>
-    <string name="settings_show_added_to_badge_title">Show \'added to\' badges</string>
+    <string name="settings_show_added_to_badge_title">Show \'Added To\' badges</string>
     <string name="settings_show_added_to_badge_summary">Show badges on items in lists if items\nare added to WatchList or Library</string>
     <string name="settings_show_english_titles_title">Use translated titles</string>
     <string name="settings_show_english_titles_summary">Use translated titles of entries as preferable,\nwhen possible</string>
     <string name="settings_show_next_airing_episode_title">Show next airing episode</string>
     <string name="settings_show_next_airing_episode_summary">Show info about next airing episode of entry\non details page</string>
-    <string name="settings_show_cover_tip_title">Show cover tip</string>
-    <string name="settings_show_cover_tip_summary">Show tip about how to view large cover</string>
     <string name="settings_set_bumper_title">Set bumper</string>
     <string name="settings_remove_bumper_title">Remove bumper</string>
     <string name="settings_select_bumper_intent_title">Select bumper</string>
     <string name="settings_bumper_set_successfully">Bumper set. Enjoy!</string>
     <string name="settings_bumper_removed_successfully">Bumper removed</string>
     <string name="settings_no_bumper_set_message">No bumper set</string>
+    <string name="settings_make_backup_title">Export database</string>
+    <string name="settings_restore_title">Import database</string>
     <string name="settings_clear_cache_title">Clear cache</string>
     <string name="settings_clear_cache_summary">You can free up storage by clearing your cache</string>
     <string name="settings_clear_metadata_title">Wipe cached metadata</string>
     <string name="settings_clear_metadata_summary">Clear saved metadata about items</string>
+    <string name="settings_use_secure_mode_title">Secure mode</string>
+    <string name="settings_use_secure_mode_summary">Forbid making screenshots and blur app\'s\ncontent in Recents Screen</string>
 
-    <string name="mal_attribution_message">This app uses myanimelist.net to provide search function and fetch airing schedule and details about animes. Click to copy link.</string>
-    <string name="al_attribution_message">This app uses anilist.co to provide animes\' covers, details about animes\' next airing episodes, animes recommendations, anime characters and cast, trending animes and anime seasons. Click to copy link.</string>
+    <string name="mal_attribution_message">This app uses myanimelist.net to provide search function and fetch airing schedule and details about anime. Click to copy link.</string>
+    <string name="al_attribution_message">This app uses anilist.co to provide anime covers, details about anime next airing episodes, anime recommendations, characters and cast, trending anime and season schedules. Click to copy link.</string>
     <string name="fi_attribution_message">This app uses Feather icons. Click to copy link.</string>
-    <string name="at_attribution_message">This app uses anitrendz.com to provide charts. Click to copy link.</string>
-    <string name="md_attribution_message">This app uses mangadex.org to provide search of source material. Click to copy link.</string>
+    <string name="at_attribution_message">This app uses anitrendz.com to provide anime charts. Click to copy link.</string>
+    <string name="md_attribution_message">This app uses mangadex.org to provide search of anime source material. Click to copy link.</string>
 
     <string name="nav_kiosk_title"></string>
     <string name="nav_towatch_title">WatchList</string>
     <string name="nav_search_title">Search</string>
     <string name="nav_watched_title">Library</string>
     <string name="nav_more_options_title">More</string>
+
+    <string name="shortcut_search_short_label">Search</string>
+    <string name="shortcut_charts_short_label">Charts</string>
 </resources>

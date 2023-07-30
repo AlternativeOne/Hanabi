@@ -28,11 +28,11 @@ import com.lexoff.animediary.Info.AnimeSearchItemInfo;
 import com.lexoff.animediary.Info.CompanySearchItemInfo;
 import com.lexoff.animediary.Info.SearchInfo;
 import com.lexoff.animediary.Info.SearchItemInfo;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Enum.InfoSourceType;
+import com.lexoff.animediary.Util.NavigationUtils;
 import com.lexoff.animediary.R;
 import com.lexoff.animediary.Adapter.SearchResultsAdapter;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,7 +75,7 @@ public class SearchFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mainHandler=new Handler(Looper.getMainLooper());
+        mainHandler=new Handler(Looper.myLooper(), null);
 
         defPrefs=PreferenceManager.getDefaultSharedPreferences(requireContext());
 
@@ -92,9 +92,12 @@ public class SearchFragment extends BaseFragment {
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         //set margins of statusbar and navbar
-        int statusbarHeight = Utils.getStatusBarHeight(requireContext());
-        int navbarHeight = Utils.getNavBarHeight(requireContext());
-        rootView.setPadding(0, statusbarHeight, 0, navbarHeight);
+        //post because if not then padding will not be set to rootview of fragments opened from AnimeFragment
+        rootView.post(()->{
+            int statusbarHeight = Utils.getStatusBarHeight(requireContext());
+            int navbarHeight = Utils.getNavBarHeight(requireContext());
+            rootView.setPadding(0, statusbarHeight, 0, navbarHeight);
+        });
 
         resultsView = rootView.findViewById(R.id.results_view);
 

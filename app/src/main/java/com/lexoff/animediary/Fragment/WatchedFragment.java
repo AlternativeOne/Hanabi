@@ -18,27 +18,26 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.widget.NestedScrollView;
-import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.lexoff.animediary.Adapter.PinnedPlaylistsChipsAdapter;
+import com.lexoff.animediary.Adapter.WatchedRecordsAdapter;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.Database.ADatabase;
-import com.lexoff.animediary.Database.AnimeWatchedEntity;
 import com.lexoff.animediary.Database.AppDatabase;
-import com.lexoff.animediary.Database.PlaylistEntity;
-import com.lexoff.animediary.InfoSourceType;
-import com.lexoff.animediary.ListMode;
-import com.lexoff.animediary.NavigationUtils;
+import com.lexoff.animediary.Database.Model.AnimeWatchedEntity;
+import com.lexoff.animediary.Database.Model.PlaylistEntity;
+import com.lexoff.animediary.Enum.InfoSourceType;
+import com.lexoff.animediary.Enum.ListMode;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
-import com.lexoff.animediary.Adapter.WatchedRecordsAdapter;
-import com.lexoff.animediary.WatchedSortingMode;
+import com.lexoff.animediary.Util.NavigationUtils;
+import com.lexoff.animediary.Util.Utils;
+import com.lexoff.animediary.Enum.WatchedSortingMode;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,7 +47,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class WatchedFragment extends Fragment {
+public class WatchedFragment extends BaseFragment {
 
     private AppDatabase database;
     private SharedPreferences defPrefs;
@@ -345,8 +344,18 @@ public class WatchedFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        if (resultsView != null)
+        if (resultsView != null && resultsView.getLayoutManager()!=null)
             savedListState = resultsView.getLayoutManager().onSaveInstanceState();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+        if (currentWorker!=null){
+            currentWorker.dispose();
+            currentWorker=null;
+        }
     }
 
     @Override

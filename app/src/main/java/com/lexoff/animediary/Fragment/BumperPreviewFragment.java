@@ -11,18 +11,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 
 import com.lexoff.animediary.BumperCallback;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class BumperPreviewFragment extends Fragment {
+public class BumperPreviewFragment extends BaseFragment {
 
     private Uri uri;
     private BumperCallback callback;

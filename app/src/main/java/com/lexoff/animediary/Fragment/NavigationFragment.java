@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.IdRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -14,6 +15,9 @@ import com.lexoff.animediary.R;
 
 public class NavigationFragment extends BaseFragment {
 
+    @IdRes
+    private int fragmentToOpenId=R.id.towatch_nav_item;
+
     public NavigationFragment() {
         //empty
     }
@@ -21,6 +25,16 @@ public class NavigationFragment extends BaseFragment {
     public static NavigationFragment newInstance() {
         NavigationFragment fragment = new NavigationFragment();
         return fragment;
+    }
+
+    public static NavigationFragment newInstance(@IdRes int fragmentToOpenId) {
+        NavigationFragment fragment = new NavigationFragment();
+        fragment.setFragmentToOpenId(fragmentToOpenId);
+        return fragment;
+    }
+
+    private void setFragmentToOpenId(@IdRes int fragmentToOpenId){
+        this.fragmentToOpenId=fragmentToOpenId;
     }
 
     @Override
@@ -67,8 +81,7 @@ public class NavigationFragment extends BaseFragment {
 
     private void setupBottomNav(View view) {
         BottomNavigationView bottomNavigationView = view.findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.towatch_nav_item);
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
             //TODO: rework this
             //to not allow to open the same fragment as already opened
 
@@ -93,6 +106,12 @@ public class NavigationFragment extends BaseFragment {
             }
 
             return true;
+        });
+
+        //without this it won't open search fragment from static shortcut
+        //but with this, it could lead to race condition
+        bottomNavigationView.post(() -> {
+            bottomNavigationView.setSelectedItemId(fragmentToOpenId);
         });
     }
 

@@ -3,7 +3,7 @@ package com.lexoff.animediary.Extractor;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
-import com.lexoff.animediary.ChartsCategory;
+import com.lexoff.animediary.Enum.ChartsCategory;
 import com.lexoff.animediary.Client;
 import com.lexoff.animediary.Info.ChartsInfo;
 import com.lexoff.animediary.Info.ChartsItemInfo;

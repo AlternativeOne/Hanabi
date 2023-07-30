@@ -1,5 +1,7 @@
 package com.lexoff.animediary;
 
+import com.lexoff.animediary.Enum.ChartsCategory;
+import com.lexoff.animediary.Exception.ServiceUnavailableException;
 import com.lexoff.animediary.Extractor.AiringScheduleExtractor;
 import com.lexoff.animediary.Extractor.AnimeAdditionalInfoExtractor;
 import com.lexoff.animediary.Extractor.AnimeExtractor;

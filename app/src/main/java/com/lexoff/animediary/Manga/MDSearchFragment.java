@@ -14,17 +14,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.lexoff.animediary.Api;
 import com.lexoff.animediary.Constants;
 import com.lexoff.animediary.CustomOnItemClickListener;
 import com.lexoff.animediary.R;
-import com.lexoff.animediary.Utils;
+import com.lexoff.animediary.Util.ResourcesHelper;
+import com.lexoff.animediary.Util.ShareUtils;
+import com.lexoff.animediary.Util.Utils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -67,7 +69,7 @@ public class MDSearchFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        toastHandler=new Handler(Looper.getMainLooper());
+        toastHandler=new Handler(Looper.myLooper(), null);
 
         currentPage=1;
         maxPage=1;
@@ -190,10 +192,10 @@ public class MDSearchFragment extends Fragment {
                     items[1]=getString(R.string.manga_dialog_item_open_in_tachiyomi);
                 }
 
-                new AlertDialog.Builder(requireContext(), R.style.DarkDialogTheme)
+                new MaterialAlertDialogBuilder(requireContext(), R.style.DarkDialogTheme)
                         .setItems(items, (dialog, which) -> {
                             if (which==0){
-                                Utils.copyToClipboard(requireContext(), "", Utils.buildMangaDexUrl(item.getId()));
+                                ShareUtils.copyToClipboard(requireContext(), "", Utils.buildMangaDexUrl(item.getId()));
                             } else if (which==1){
                                 try {
                                     Intent intent = new Intent();
@@ -207,6 +209,7 @@ public class MDSearchFragment extends Fragment {
                             }
                         })
                         .setCancelable(true)
+                        .setBackground(ResourcesHelper.roundedDarkDialogBackground())
                         .create()
                         .show();
             }
